@@ -4,6 +4,8 @@ Priority: extra
 Maintainer: Qijiang Fan <fqj1994@gmail.com>
 Build-Depends: debhelper (>= 7), python-setuptools, python-all (>= 2.6.6~3)
 X-Python-Version: >= 2.4
+VCS-Git: git://git.debian.org/git/collab-maint/
+VCS-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/supervisor.git;a=summary
 Standards-Version: 3.9.4
 Homepage: http://supervisord.org/
 
