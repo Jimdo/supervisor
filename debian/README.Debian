@@ -1,0 +1,14 @@
+supervisor for Debian
+---------------------
+
+The Debian package for supervisor installs a standardised config file
+in /etc/supervisor/supervisord.conf. If the only thing you want to do
+is add configuration for programs and groups, you should create
+config files in /etc/supervisor/conf.d/*.conf, these will be read by
+the default config.
+
+There is an init.d script that will start a single instance of
+supervisord as root. If you intend to use supervisor only as another
+user, you may want to disable the init.d startup.
+
+ -- Anders Hammarquist <iko@openend.se>  Wed, 16 Jul 2008 10:36:09 +0200
