@@ -23,6 +23,5 @@ override_dh_install:
 	install -d debian/tmp/etc/supervisor/conf.d
 	install -m 644 debian/README.conf debian/tmp/etc/supervisor/conf.d/README
 	install -m 644 debian/supervisord.conf debian/tmp/etc/supervisor/supervisord.conf
-	ls debian/supervisor -alihR
 	find debian/ -name 'LICENSE.txt' -delete
 	dh_install --fail-missing
