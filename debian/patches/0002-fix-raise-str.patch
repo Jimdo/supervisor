@@ -1,0 +1,21 @@
+From: Qijiang Fan <fqj1994@gmail.com>
+Date: Fri, 19 Jul 2013 11:38:58 +0800
+Subject: fix raise str
+
+---
+ supervisor/medusa/xmlrpc_handler.py |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/supervisor/medusa/xmlrpc_handler.py b/supervisor/medusa/xmlrpc_handler.py
+index 18fa806..24c7751 100644
+--- a/supervisor/medusa/xmlrpc_handler.py
++++ b/supervisor/medusa/xmlrpc_handler.py
+@@ -56,7 +56,7 @@ class xmlrpc_handler:
+ 
+     def call (self, method, params):
+         # override this method to implement RPC methods
+-        raise "NotYetImplemented"
++        raise Exception("NotYetImplemented")
+ 
+ class collector:
+ 

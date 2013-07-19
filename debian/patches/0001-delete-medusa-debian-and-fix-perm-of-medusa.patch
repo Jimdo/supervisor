@@ -1,0 +1,248 @@
+From: Qijiang Fan <fqj1994@gmail.com>
+Date: Fri, 19 Jul 2013 11:37:00 +0800
+Subject: delete medusa/debian, and fix perm of medusa/*
+
+---
+ supervisor/medusa/debian/changelog             |   12 ------
+ supervisor/medusa/debian/control               |   14 -------
+ supervisor/medusa/debian/copyright             |   24 ------------
+ supervisor/medusa/debian/postinst              |   49 ------------------------
+ supervisor/medusa/debian/prerm                 |   26 -------------
+ supervisor/medusa/debian/rules                 |   49 ------------------------
+ supervisor/medusa/docs/composing_producers.gif |  Bin 2707 -> 2707 bytes
+ supervisor/medusa/docs/data_flow.gif           |  Bin 4091 -> 4091 bytes
+ supervisor/medusa/docs/producers.gif           |  Bin 5814 -> 5814 bytes
+ 9 files changed, 174 deletions(-)
+ delete mode 100644 supervisor/medusa/debian/changelog
+ delete mode 100644 supervisor/medusa/debian/control
+ delete mode 100644 supervisor/medusa/debian/copyright
+ delete mode 100755 supervisor/medusa/debian/postinst
+ delete mode 100644 supervisor/medusa/debian/prerm
+ delete mode 100755 supervisor/medusa/debian/rules
+ mode change 100755 => 100644 supervisor/medusa/docs/composing_producers.gif
+ mode change 100755 => 100644 supervisor/medusa/docs/data_flow.gif
+ mode change 100755 => 100644 supervisor/medusa/docs/producers.gif
+ mode change 100755 => 100644 supervisor/medusa/test/asyn_http_bench.py
+
+diff --git a/supervisor/medusa/debian/changelog b/supervisor/medusa/debian/changelog
+deleted file mode 100644
+index b8ad356..0000000
+--- a/supervisor/medusa/debian/changelog
++++ /dev/null
+@@ -1,12 +0,0 @@
+-python2.3-medusa (0.5.4-2) unstable; urgency=low
+-
+-  * Switch to Python 2.3.
+-
+- -- A.M. Kuchling <amk@amk.ca>  Thu, 9 Oct 2003 08:22:00 -0400
+-
+-python2.2-medusa (0.5.4-1) unstable; urgency=low
+-
+-  * Initial Release.
+-
+- -- A.M. Kuchling <amk@amk.ca>  Fri, 22 Aug 2003 08:54:11 -0400
+-
+diff --git a/supervisor/medusa/debian/control b/supervisor/medusa/debian/control
+deleted file mode 100644
+index 096a00f..0000000
+--- a/supervisor/medusa/debian/control
++++ /dev/null
+@@ -1,14 +0,0 @@
+-Source: python2.3-medusa
+-Priority: optional
+-Maintainer: A.M. Kuchling <amk@amk.ca>
+-Build-Depends: debhelper (>> 3.0.0)
+-Standards-Version: 3.5.8
+-Section: net
+-
+-Package: python2.3-medusa
+-Section: net
+-Architecture: all
+-Depends: python2.3
+-Description: Medusa is a 'server platform' -- it provides a framework for
+-    implementing asynchronous socket-based servers (TCP/IP and on Unix,
+-    Unix domain, sockets).
+diff --git a/supervisor/medusa/debian/copyright b/supervisor/medusa/debian/copyright
+deleted file mode 100644
+index 841cd2e..0000000
+--- a/supervisor/medusa/debian/copyright
++++ /dev/null
+@@ -1,24 +0,0 @@
+-This package was debianized by A.M. Kuchling <amk@amk.ca> on
+-Fri, 22 Aug 2003 08:54:11 -0400.
+-
+-It was downloaded from www.amk.ca/python/code/medusa.html
+-
+-Upstream Author: A.M. Kuchling <amk@amk.ca>
+-
+-Copyright:
+-
+-Permission to use, copy, modify, and distribute this software and
+-its documentation for any purpose and without fee is hereby granted,
+-provided that the above copyright notice appear in all copies and
+-that both that copyright notice and this permission notice appear in
+-supporting documentation, and that the name of Sam Rushing not be
+-used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
+-
+-SAM RUSHING DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+-INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN
+-NO EVENT SHALL SAM RUSHING BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+-OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+-WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+diff --git a/supervisor/medusa/debian/postinst b/supervisor/medusa/debian/postinst
+deleted file mode 100755
+index 8d42bac..0000000
+--- a/supervisor/medusa/debian/postinst
++++ /dev/null
+@@ -1,49 +0,0 @@
+-#! /bin/sh 
+-# postinst script for medusa
+-#
+-# see: dh_installdeb(1)
+-
+-set -e
+-
+-# summary of how this script can be called:
+-#        * <postinst> `configure' <most-recently-configured-version>
+-#        * <old-postinst> `abort-upgrade' <new version>
+-#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+-#          <new-version>
+-#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+-#          <failed-install-package> <version> `removing'
+-#          <conflicting-package> <version>
+-# for details, see http://www.debian.org/doc/debian-policy/ or
+-# the debian-policy package
+-#
+-# quoting from the policy:
+-#     Any necessary prompting should almost always be confined to the
+-#     post-installation script, and should be protected with a conditional
+-#     so that unnecessary prompting doesn't happen if a package's
+-#     installation fails and the `postinst' is called with `abort-upgrade',
+-#     `abort-remove' or `abort-deconfigure'.
+-
+-PACKAGE=python2.3-medusa
+-VERSION=2.3
+-LIB="/usr/lib/python$VERSION"
+-DIRLIST="$LIB/site-packages/medusa"
+-
+-case "$1" in
+-    configure|abort-upgrade|abort-remove|abort-deconfigure)
+-        for i in $DIRLIST ; do
+-            /usr/bin/python$VERSION -O $LIB/compileall.py -q $i
+-            /usr/bin/python$VERSION $LIB/compileall.py -q $i
+-        done
+-    ;;
+-
+-    *)
+-        echo "postinst called with unknown argument \`$1'" >&2
+-        exit 1
+-    ;;
+-esac
+-
+-
+-
+-exit 0
+-
+-
+diff --git a/supervisor/medusa/debian/prerm b/supervisor/medusa/debian/prerm
+deleted file mode 100644
+index bd6819e..0000000
+--- a/supervisor/medusa/debian/prerm
++++ /dev/null
+@@ -1,26 +0,0 @@
+-#! /bin/sh 
+-# prerm script for medusa
+-
+-set -e
+-
+-PACKAGE=python2.3-medusa
+-VERSION=2.3
+-LIB="/usr/lib/python$VERSION"
+-DIRLIST="$LIB/site-packages/medusa"
+-
+-case "$1" in
+-    remove|upgrade|failed-upgrade)
+-        for i in $DIRLIST ; do
+-            find $i -name '*.py[co]' -exec rm \{\} \;
+-        done
+-    ;;
+-
+-    *)
+-        echo "prerm called with unknown argument \`$1'" >&2
+-        exit 1
+-    ;;
+-esac
+-
+-
+-
+-exit 0
+diff --git a/supervisor/medusa/debian/rules b/supervisor/medusa/debian/rules
+deleted file mode 100755
+index 7f73054..0000000
+--- a/supervisor/medusa/debian/rules
++++ /dev/null
+@@ -1,49 +0,0 @@
+-#!/usr/bin/make -f
+-# Sample debian/rules that uses debhelper.
+-# GNU copyright 1997 to 1999 by Joey Hess.
+-
+-# Uncomment this to turn on verbose mode.
+-#export DH_VERBOSE=1
+-
+-# This is the debhelper compatibility version to use.
+-export DH_COMPAT=4
+-
+-
+-
+-build: build-stamp
+-	/usr/bin/python setup.py build
+-build-stamp: 
+-	touch build-stamp
+-
+-configure:
+-	# Do nothing
+-
+-clean:
+-	dh_testdir
+-	dh_testroot
+-	rm -f build-stamp
+-
+-	-rm -rf build
+-
+-	dh_clean
+-
+-install: build
+-	dh_testdir
+-	dh_testroot
+-	dh_clean -k
+-	/usr/bin/python setup.py install --no-compile --prefix=$(CURDIR)/debian/python2.3-medusa/usr
+-
+-# Build architecture-independent files here.
+-binary-indep: install
+-	dh_testdir
+-	dh_testroot
+-
+-	dh_installdocs
+-	dh_installdeb
+-	dh_gencontrol
+-	dh_md5sums
+-	dh_builddeb
+-# We have nothing to do by default.
+-
+-binary: binary-indep 
+-.PHONY: build clean binary-indep binary install
+diff --git a/supervisor/medusa/docs/composing_producers.gif b/supervisor/medusa/docs/composing_producers.gif
+old mode 100755
+new mode 100644
+diff --git a/supervisor/medusa/docs/data_flow.gif b/supervisor/medusa/docs/data_flow.gif
+old mode 100755
+new mode 100644
+diff --git a/supervisor/medusa/docs/producers.gif b/supervisor/medusa/docs/producers.gif
+old mode 100755
+new mode 100644
+diff --git a/supervisor/medusa/test/asyn_http_bench.py b/supervisor/medusa/test/asyn_http_bench.py
+old mode 100755
+new mode 100644

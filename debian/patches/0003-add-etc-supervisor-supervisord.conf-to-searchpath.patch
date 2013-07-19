@@ -1,0 +1,47 @@
+From: Qijiang Fan <fqj1994@gmail.com>
+Date: Fri, 19 Jul 2013 11:43:06 +0800
+Subject: add /etc/supervisor/supervisord.conf to searchpath
+
+---
+ supervisor/options.py |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/supervisor/options.py b/supervisor/options.py
+index 3ccab60..ed97ba3 100644
+--- a/supervisor/options.py
++++ b/supervisor/options.py
+@@ -101,6 +101,7 @@ class Options:
+         searchpaths = [os.path.join(here, 'etc', 'supervisord.conf'),
+                        os.path.join(here, 'supervisord.conf'),
+                        'supervisord.conf', 'etc/supervisord.conf',
++                       '/etc/supervisor/supervisord.conf',
+                        '/etc/supervisord.conf']
+         self.searchpaths = searchpaths
+ 
+@@ -305,7 +306,7 @@ class Options:
+ 
+     def process_config(self, do_usage=True):
+         """Process configuration data structure.
+-        
++
+         This includes reading config file if necessary, setting defaults etc.
+         """
+         if self.configfile:
+@@ -822,7 +823,7 @@ class ServerOptions(Options):
+                 raise ValueError(
+                     '%(process_num) must be present within process_name when '
+                     'numprocs > 1')
+-                    
++
+         if stopasgroup and not killasgroup:
+             raise ValueError("Cannot set stopasgroup=true and killasgroup=false")
+ 
+@@ -1207,7 +1208,7 @@ class ServerOptions(Options):
+ 
+             # always put our primary gid first in this list, otherwise we can
+             # lose group info since sometimes the first group in the setgroups
+-            # list gets overwritten on the subsequent setgid call (at least on 
++            # list gets overwritten on the subsequent setgid call (at least on
+             # freebsd 9 with python 2.7 - this will be safe though for all unix
+             # /python version combos)
+             groups.insert(0, gid)
