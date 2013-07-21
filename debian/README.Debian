@@ -12,3 +12,8 @@ supervisord as root. If you intend to use supervisor only as another
 user, you may want to disable the init.d startup.
 
  -- Anders Hammarquist <iko@openend.se>  Wed, 16 Jul 2008 10:36:09 +0200
+
+Place custom configuration files for supervisor here. They
+will be read after the main configuration file in
+/etc/supervisor/supervisord.conf
+-------------------------------------------------------------------------
