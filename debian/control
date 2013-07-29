@@ -11,7 +11,7 @@ Homepage: http://supervisord.org/
 
 Package: supervisor
 Architecture: all
-Depends: python (>= 2.4), python-meld3, python-pkg-resources (>= 0.6c7), ${misc:Depends}
+Depends: python, python-meld3, python-pkg-resources (>= 0.6c7), ${misc:Depends}
 Description: A system for controlling process state
  Supervisor is a system for controlling and maintaining process state,
  similar to what init does, but not intended as an init replacement.
