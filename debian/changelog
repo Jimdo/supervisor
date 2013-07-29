@@ -1,10 +1,10 @@
 supervisor (3.0b2-1) unstable; urgency=low
 
-  * New Maintainer (Closes: 717060)
-  * New upstream release (Closes: 697883, 608694)
-  * Fix restart function of init script (Closes: 609457)
-  * Fix typo in package description (Closes: 697622)
-  * Fix "string exception" (Closes: 585359)
+  * New Maintainer (Closes: #717060)
+  * New upstream release (Closes: #697883, #608694)
+  * Fix restart function of init script (Closes: #609457)
+  * Fix typo in package description (Closes: #697622)
+  * Fix "string exception" (Closes: #585359)
 
  -- Qijiang Fan <fqj1994@gmail.com>  Thu, 18 Jul 2013 10:49:09 +0800
 
