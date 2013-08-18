@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: supervisor
-Version: 3.0b2
+Version: 3.0
 Summary: A system for controlling process state under UNIX
 Home-page: http://supervisord.org/
 Author: Mike Naberezny
@@ -52,6 +52,26 @@ Description: Supervisor
         <http://lists.supervisord.org/mailman/listinfo/supervisor-users>`_.
         
         
+        
+        3.0 (2013-07-30)
+        ----------------
+        
+        - Parsing the config file will now fail with an error message if a process
+          or group name contains characters that are not compatible with the
+          eventlistener protocol.
+        
+        - Fixed a bug where the ``tail -f`` command in ``supervisorctl`` would fail
+          if the combined length of the username and password was over 56 characters.
+        
+        - Reading the config file now gives a separate error message when the config
+          file exists but can't be read.  Previously, any error reading the file
+          would be reported as "could not find config file".  Patch by Jens Rantil.
+        
+        - Fixed an XML-RPC bug where array elements after the first would be ignored
+          when using the ElementTree-based XML parser.  Patch by Zev Benjamin.
+        
+        - Fixed the usage message output by ``supervisorctl`` to show the correct
+          default config file path.  Patch by Alek Storm.
         
         3.0b2 (2013-05-28)
         ------------------
