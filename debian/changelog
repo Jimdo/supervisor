@@ -1,3 +1,9 @@
+supervisor (3.0r1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Qijiang Fan <fqj1994@gmail.com>  Sun, 18 Aug 2013 11:34:52 +0800
+
 supervisor (3.0b2-1) unstable; urgency=low
 
   * New Maintainer (Closes: #717060)
