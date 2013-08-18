@@ -143,6 +143,18 @@ class DatatypesTest(unittest.TestCase):
         self.assertRaises(ValueError,
                           datatypes.dict_of_key_value_pairs, kvp)
 
+    def test_process_or_group_name_strips_surrounding_whitespace(self):
+        name = " foo\t"
+        self.assertEqual("foo", datatypes.process_or_group_name(name))
+
+    def test_process_or_group_name_disallows_inner_spaces(self):
+        name = "foo bar"
+        self.assertRaises(ValueError, datatypes.process_or_group_name, name)
+
+    def test_process_or_group_name_disallows_colons(self):
+        name = "foo:bar"
+        self.assertRaises(ValueError, datatypes.process_or_group_name, name)
+
     def test_logfile_name_returns_none_for_none_values(self):
         for thing in datatypes.LOGFILE_NONES:
             actual = datatypes.logfile_name(thing)
@@ -246,33 +258,6 @@ class DatatypesTest(unittest.TestCase):
     @patch("grp.getgrgid", Mock(side_effect=KeyError("bad group id")))
     def test_name_to_gid_raises_for_bad_group_name(self):
         self.assertRaises(ValueError, datatypes.name_to_gid, "42")
-
-    def test_colon_separated_user_group_returns_both(self):
-        name_to_uid = Mock(return_value=12)
-        name_to_gid = Mock(return_value=34)
-
-        @patch("supervisor.datatypes.name_to_uid", name_to_uid)
-        @patch("supervisor.datatypes.name_to_gid", name_to_gid)
-        def colon_separated():
-            return datatypes.colon_separated_user_group("foo:bar")
-
-        uid, gid = colon_separated()
-        name_to_uid.assert_called_with("foo")
-        self.assertEquals(12, uid)
-        name_to_gid.assert_called_with("bar")
-        self.assertEquals(34, gid)
-
-    def test_colon_separated_user_group_returns_user_only(self):
-        name_to_uid = Mock(return_value=42)
-
-        @patch("supervisor.datatypes.name_to_uid", name_to_uid)
-        def colon_separated():
-            return datatypes.colon_separated_user_group("foo")
-
-        uid, gid = colon_separated()
-        name_to_uid.assert_called_with("foo")
-        self.assertEquals(42, uid)
-        self.assertEquals(-1, gid)
 
 class InetStreamSocketConfigTests(unittest.TestCase):
     def _getTargetClass(self):
@@ -490,6 +475,33 @@ class TestColonSeparatedUserGroup(unittest.TestCase):
     def test_missinguser_username_and_groupname(self):
         self.assertRaises(ValueError,
                           self._callFUT, 'godihopethisuserdoesntexist:foo')
+
+    def test_separated_user_group_returns_both(self):
+        name_to_uid = Mock(return_value=12)
+        name_to_gid = Mock(return_value=34)
+
+        @patch("supervisor.datatypes.name_to_uid", name_to_uid)
+        @patch("supervisor.datatypes.name_to_gid", name_to_gid)
+        def colon_separated(value):
+            return self._callFUT(value)
+
+        uid, gid = colon_separated("foo:bar")
+        name_to_uid.assert_called_with("foo")
+        self.assertEquals(12, uid)
+        name_to_gid.assert_called_with("bar")
+        self.assertEquals(34, gid)
+
+    def test_separated_user_group_returns_user_only(self):
+        name_to_uid = Mock(return_value=42)
+
+        @patch("supervisor.datatypes.name_to_uid", name_to_uid)
+        def colon_separated(value):
+            return self._callFUT(value)
+
+        uid, gid = colon_separated("foo")
+        name_to_uid.assert_called_with("foo")
+        self.assertEquals(42, uid)
+        self.assertEquals(-1, gid)
 
 class TestOctalType(unittest.TestCase):
     def _callFUT(self, arg):

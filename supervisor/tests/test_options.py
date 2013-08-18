@@ -178,6 +178,47 @@ class ClientOptionsTests(unittest.TestCase):
         self.assertEqual(options.password, '123')
         self.assertEqual(options.history_file, history_file)
 
+    def test_unreadable_config_file(self):
+        # Quick and dirty way of coming up with a decent filename
+        tempf = tempfile.NamedTemporaryFile()
+        fname = tempf.name
+        tempf.close()
+        self.assertFalse(os.path.exists(fname))
+
+        instance = self._makeOne()
+        instance.stderr = StringIO()
+
+        class DummyException(Exception):
+            def __init__(self, exitcode):
+                self.exitcode = exitcode
+        def dummy_exit(self, exitcode=2):
+            # Important default exitcode=2 like sys.exit.
+            raise DummyException(exitcode)
+        instance.exit = dummy_exit
+        try:
+            instance.realize(args=['-c', fname])
+        except DummyException, e:
+            self.assertEquals(e.exitcode, 2)
+        else:
+            self.fail("expected exception")
+
+        try:
+            instance.read_config(fname)
+        except ValueError, e:
+            self.assertTrue("could not find config file" in str(e))
+        else:
+            self.fail("expected exception")
+
+        tempf = tempfile.NamedTemporaryFile()
+        os.chmod(tempf.name, 0) # Removing read perms
+        try:
+            instance.read_config(tempf.name)
+        except ValueError, e:
+            self.assertTrue("could not read config file" in str(e))
+        else:
+            self.fail("expected exception")
+        tempf.close()
+
     def test_options_unixsocket_cli(self):
         from StringIO import StringIO
         fp = StringIO('[supervisorctl]')
@@ -544,6 +585,47 @@ class ServerOptionsTests(unittest.TestCase):
         instance.realize(args=[])
         self.assertFalse(old_warning in instance.parse_warnings)
 
+    def test_unreadable_config_file(self):
+        # Quick and dirty way of coming up with a decent filename
+        tempf = tempfile.NamedTemporaryFile()
+        fname = tempf.name
+        tempf.close()
+        self.assertFalse(os.path.exists(fname))
+
+        instance = self._makeOne()
+        instance.stderr = StringIO()
+
+        class DummyException(Exception):
+            def __init__(self, exitcode):
+                self.exitcode = exitcode
+        def dummy_exit(self, exitcode=2):
+            # Important default exitcode=2 like sys.exit.
+            raise DummyException(exitcode)
+        instance.exit = dummy_exit
+        try:
+            instance.realize(args=['-c', fname])
+        except DummyException, e:
+            self.assertEquals(e.exitcode, 2)
+        else:
+            self.fail("expected exception")
+
+        try:
+            instance.read_config(fname)
+        except ValueError, e:
+            self.assertTrue("could not find config file" in str(e))
+        else:
+            self.fail("expected exception")
+
+        tempf = tempfile.NamedTemporaryFile()
+        os.chmod(tempf.name, 0) # Removing read perms
+        try:
+            instance.read_config(tempf.name)
+        except ValueError, e:
+            self.assertTrue("could not read config file" in str(e))
+        else:
+            self.fail("expected exception")
+        tempf.close()
+
     def test_readFile_failed(self):
         from supervisor.options import readFile
         try:
@@ -758,6 +840,28 @@ class ServerOptionsTests(unittest.TestCase):
         expected = "/bin/foo --path='%s'" % os.environ['PATH']
         self.assertEqual(pconfigs[0].command, expected)
 
+    def test_processes_from_section_bad_program_name_spaces(self):
+        instance = self._makeOne()
+        text = lstrip("""\
+        [program:spaces are bad]
+        """)
+        from supervisor.options import UnhosedConfigParser
+        config = UnhosedConfigParser()
+        config.read_string(text)
+        self.assertRaises(ValueError, instance.processes_from_section,
+                          config, 'program:spaces are bad', None)
+
+    def test_processes_from_section_bad_program_name_colons(self):
+        instance = self._makeOne()
+        text = lstrip("""\
+        [program:colons:are:bad]
+        """)
+        from supervisor.options import UnhosedConfigParser
+        config = UnhosedConfigParser()
+        config.read_string(text)
+        self.assertRaises(ValueError, instance.processes_from_section,
+                          config, 'program:colons:are:bad', None)
+
     def test_processes_from_section_no_procnum_in_processname(self):
         instance = self._makeOne()
         text = lstrip("""\
@@ -802,6 +906,19 @@ class ServerOptionsTests(unittest.TestCase):
         [program:foo]
         command = /bin/cat
         process_name = %(program_name)
+        """)
+        from supervisor.options import UnhosedConfigParser
+        config = UnhosedConfigParser()
+        config.read_string(text)
+        self.assertRaises(ValueError, instance.processes_from_section,
+                          config, 'program:foo', None)
+
+    def test_processes_from_section_bad_chars_in_process_name(self):
+        instance = self._makeOne()
+        text = lstrip("""\
+        [program:foo]
+        command = /bin/cat
+        process_name = colons:are:bad
         """)
         from supervisor.options import UnhosedConfigParser
         config = UnhosedConfigParser()

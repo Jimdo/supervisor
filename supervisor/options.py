@@ -23,6 +23,7 @@ from fcntl import F_SETFL, F_GETFL
 
 from supervisor.medusa import asyncore_25 as asyncore
 
+from supervisor.datatypes import process_or_group_name
 from supervisor.datatypes import boolean
 from supervisor.datatypes import integer
 from supervisor.datatypes import name_to_uid
@@ -122,10 +123,10 @@ class Options:
 
         Occurrences of "%s" in are replaced by self.progname.
         """
-        help = self.doc
+        help = self.doc + "\n"
         if help.find("%s") > 0:
             help = help.replace("%s", self.progname)
-        print help,
+        self.stdout.write(help)
         self.exit(0)
 
     def usage(self, msg):
@@ -516,10 +517,12 @@ class ServerOptions(Options):
 
         section = self.configroot.supervisord
         if not hasattr(fp, 'read'):
+            if not os.path.exists(fp):
+                raise ValueError("could not find config file %s" % fp)
             try:
                 fp = open(fp, 'r')
             except (IOError, OSError):
-                raise ValueError("could not find config file %s" % fp)
+                raise ValueError("could not read config file %s" % fp)
         parser = UnhosedConfigParser()
         try:
             parser.readfp(fp)
@@ -606,7 +609,7 @@ class ServerOptions(Options):
         for section in all_sections:
             if not section.startswith('group:'):
                 continue
-            group_name = section.split(':', 1)[1]
+            group_name = process_or_group_name(section.split(':', 1)[1])
             programs = list_of_strings(get(section, 'programs', None))
             priority = integer(get(section, 'priority', 999))
             group_processes = []
@@ -629,7 +632,7 @@ class ServerOptions(Options):
             if ( (not section.startswith('program:') )
                  or section in homogeneous_exclude ):
                 continue
-            program_name = section.split(':', 1)[1]
+            program_name = process_or_group_name(section.split(':', 1)[1])
             priority = integer(get(section, 'priority', 999))
             processes=self.processes_from_section(parser, section, program_name,
                                                   ProcessConfig)
@@ -681,7 +684,7 @@ class ServerOptions(Options):
             if ( (not section.startswith('fcgi-program:') )
                  or section in homogeneous_exclude ):
                 continue
-            program_name = section.split(':', 1)[1]
+            program_name = process_or_group_name(section.split(':', 1)[1])
             priority = integer(get(section, 'priority', 999))
 
             # find proc_uid from "user" option
@@ -774,7 +777,7 @@ class ServerOptions(Options):
             klass = ProcessConfig
         programs = []
         get = parser.saneget
-        program_name = section.split(':', 1)[1]
+        program_name = process_or_group_name(section.split(':', 1)[1])
         priority = integer(get(section, 'priority', 999))
         autostart = boolean(get(section, 'autostart', 'true'))
         autorestart = auto_restart(get(section, 'autorestart', 'unexpected'))
@@ -788,7 +791,6 @@ class ServerOptions(Options):
         redirect_stderr = boolean(get(section, 'redirect_stderr','false'))
         numprocs = integer(get(section, 'numprocs', 1))
         numprocs_start = integer(get(section, 'numprocs_start', 0))
-        process_name = get(section, 'process_name', '%(program_name)s')
         environment_str = get(section, 'environment', '')
         stdout_cmaxbytes = byte_size(get(section,'stdout_capture_maxbytes','0'))
         stdout_events = boolean(get(section, 'stdout_events_enabled','false'))
@@ -814,6 +816,9 @@ class ServerOptions(Options):
         if command is None:
             raise ValueError, (
                 'program section %s does not specify a command' % section)
+
+        process_name = process_or_group_name(
+            get(section, 'process_name', '%(program_name)s'))
 
         if numprocs > 1:
             if process_name.find('%(process_num)') == -1:
@@ -1501,10 +1506,12 @@ class ClientOptions(Options):
         section = self.configroot.supervisorctl
         if not hasattr(fp, 'read'):
             self.here = os.path.dirname(normalize_path(fp))
+            if not os.path.exists(fp):
+                raise ValueError("could not find config file %s" % fp)
             try:
                 fp = open(fp, 'r')
             except (IOError, OSError):
-                raise ValueError("could not find config file %s" % fp)
+                raise ValueError("could not read config file %s" % fp)
         config = UnhosedConfigParser()
         config.mysection = 'supervisorctl'
         config.readfp(fp)
